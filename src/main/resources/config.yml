@@ -1,0 +1,84 @@
+server-name: survival
+
+storage:
+  type: MYSQL # MYSQL or YAML
+
+mysql:
+  host: localhost
+  port: 3306
+  database: babypets
+  username: babypets
+  password: password
+  table: babypets_pets
+  use-ssl: false
+
+messages:
+  prefix: "&d&lBabyPets &7» "
+  no-permission: "&cYou do not have permission."
+  players-only: "&cOnly players can use this command."
+  reloaded: "&aConfig reloaded."
+  no-access: "&cYou do not have access to pets."
+  max-pets-reached: "&cYou have reached your pet limit."
+  choose-name: "&eType your pet name in chat. It will not send publicly."
+  choose-name-cancel: "&7Type &ccancel &7to stop."
+  pet-created: "&aYour pet &f{name} &ahas been created."
+  pet-removed: "&cRemoved pet &f{name}&c."
+  pet-renamed: "&aYour pet is now named &f{name}&a."
+  pet-not-found: "&cThat pet was not found."
+  check-all: "&aHighlighted all your pets."
+  check-one: "&aHighlighted pet &f{name}&a."
+  debug-header: "&7--- &dBabyPets Debug &7---"
+
+limits:
+  placeholder-value: "yes"
+  slot-placeholders:
+    1: "%luckperms_meta_pet_slot_1%"
+    2: "%luckperms_meta_pet_slot_2%"
+    3: "%luckperms_meta_pet_slot_3%"
+    4: "%luckperms_meta_pet_slot_4%"
+    5: "%luckperms_meta_pet_slot_5%"
+
+follow:
+  start-follow-distance: 4.0
+  wander-distance: 3.0
+  teleport-distance: 30.0
+  update-ticks: 10
+  glow-check-seconds: 10
+
+naming:
+  max-length: 8
+  allow-color-codes: true
+
+pets:
+  gui-title: "&5Choose Your Pet"
+  gui-size: 54
+
+  enabled-types:
+    - COW
+    - SHEEP
+    - PIG
+    - CHICKEN
+    - RABBIT
+    - GOAT
+    - WOLF
+    - CAT
+    - OCELOT
+    - FOX
+    - PANDA
+    - POLAR_BEAR
+    - TURTLE
+    - BEE
+    - CAMEL
+    - DONKEY
+    - MULE
+    - HORSE
+    - LLAMA
+    - TRADER_LLAMA
+    - MOOSHROOM
+    - HOGLIN
+    - STRIDER
+    - SNIFFER
+    - AXOLOTL
+    - PARROT
+    - FROG
+    - ALLAY

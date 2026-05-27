@@ -1,0 +1,42 @@
+name: BabyPets
+version: 1.0.6
+main: net.legacy.babypets.BabyPetsPlugin
+api-version: '1.21'
+author: XioraaYT
+
+commands:
+  pet:
+    description: Main BabyPets command
+    usage: /pet
+    aliases: [pets]
+
+permissions:
+  babypets.use:
+    default: true
+
+  babypets.admin:
+    default: op
+
+  babypets.user.amount.1:
+    description: Allows 1 pet
+    default: true
+
+  babypets.user.amount.2:
+    description: Allows 2 pets
+    default: false
+
+  babypets.user.amount.3:
+    description: Allows 3 pets
+    default: false
+
+  babypets.user.amount.4:
+    description: Allows 4 pets
+    default: false
+
+  babypets.user.amount.5:
+    description: Allows 5 pets
+    default: false
+
+  babypets.user.amount.unlimited:
+    description: Unlimited pets
+    default: op
