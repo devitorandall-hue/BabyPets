@@ -51,7 +51,7 @@
     </dependencies>
 
     <build>
-        <finalName>BabyPets-1.0.5</finalName>
+        <finalName>BabyPets-1.0.6</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

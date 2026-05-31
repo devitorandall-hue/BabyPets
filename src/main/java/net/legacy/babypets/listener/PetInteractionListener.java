@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * Handles pet XP gain when the owner kills mobs,
- * and applies XP Boost upgrade bonuses.
+ * sends tier-up messages, and applies XP Boost upgrade bonuses.
  */
 public class PetInteractionListener implements Listener {
 
@@ -37,12 +37,11 @@ public class PetInteractionListener implements Listener {
         double maxXpBoostMultiplier = 0.0;
 
         for (PetData pet : pets) {
-            // All of the player's pets earn XP (sitting or following)
-            boolean leveledUp = pet.addXp(petXpGain);
-            if (leveledUp) {
+            boolean tieredUp = pet.addXp(petXpGain);
+            if (tieredUp) {
                 String cleanName = petManager.stripLegacyCodes(pet.getName());
                 killer.sendMessage("§d✦ §fYour pet §d" + cleanName
-                        + " §fleveled up to §dlevel §f" + pet.getLevel() + "§f!");
+                        + " §fadvanced to the " + pet.getTier().getColoredName() + " §ftier!");
             }
             petManager.savePet(pet);
 
@@ -51,20 +50,15 @@ public class PetInteractionListener implements Listener {
                 int xpBoostLevel = pet.getUpgradeLevel(PetUpgrade.XP_BOOST);
                 if (xpBoostLevel > 0) {
                     double mult = PetUpgrade.XP_BOOST.getXpBoostMultiplier(xpBoostLevel);
-                    if (mult > maxXpBoostMultiplier) {
-                        maxXpBoostMultiplier = mult;
-                    }
+                    if (mult > maxXpBoostMultiplier) maxXpBoostMultiplier = mult;
                 }
             }
         }
 
-        // Grant the bonus player XP from the highest active XP Boost
+        // Grant bonus player XP from the highest active XP Boost
         if (maxXpBoostMultiplier > 0) {
-            int baseXp   = event.getDroppedExp();
-            int bonusXp  = (int) (baseXp * maxXpBoostMultiplier);
-            if (bonusXp > 0) {
-                killer.giveExp(bonusXp);
-            }
+            int bonusXp = (int) (event.getDroppedExp() * maxXpBoostMultiplier);
+            if (bonusXp > 0) killer.giveExp(bonusXp);
         }
     }
 
@@ -72,24 +66,19 @@ public class PetInteractionListener implements Listener {
 
     private int getPetXpForMob(EntityType type) {
         return switch (type) {
-            // Boss mobs
             case WITHER, ENDER_DRAGON -> 100;
 
-            // Strong / mini-boss mobs
             case ELDER_GUARDIAN, WITHER_SKELETON, BLAZE, GHAST,
                  RAVAGER, EVOKER -> 30;
 
-            // Standard hostile mobs
             case ZOMBIE, SKELETON, CREEPER, SPIDER, CAVE_SPIDER,
                  WITCH, ENDERMAN, DROWNED, HUSK, STRAY,
                  PILLAGER, VINDICATOR, PHANTOM, SLIME, MAGMA_CUBE,
                  ZOMBIFIED_PIGLIN, PIGLIN_BRUTE, HOGLIN, ZOGLIN,
                  GUARDIAN -> 15;
 
-            // Neutral / semi-hostile mobs
             case WOLF, POLAR_BEAR, BEE, ENDERMITE, SILVERFISH -> 10;
 
-            // Passive mobs (default)
             default -> 5;
         };
     }

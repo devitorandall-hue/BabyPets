@@ -2,14 +2,19 @@ package net.legacy.babypets.listener;
 
 import net.legacy.babypets.BabyPetsPlugin;
 import net.legacy.babypets.gui.PetStatsMenu;
+import net.legacy.babypets.gui.WaypointMenu;
 import net.legacy.babypets.model.PetData;
 import net.legacy.babypets.model.PetManager;
+import net.legacy.babypets.model.PetTier;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Hoglin;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
+import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Cat;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
@@ -33,12 +38,8 @@ public class PetProtectionListener implements Listener {
 
     @EventHandler
     public void onPetDamage(EntityDamageEvent event) {
-        PetManager petManager = plugin.getPetManager();
         Entity entity = event.getEntity();
-
-        if (!petManager.isPet(entity)) {
-            return;
-        }
+        if (!plugin.getPetManager().isPet(entity)) return;
 
         event.setCancelled(true);
 
@@ -60,10 +61,7 @@ public class PetProtectionListener implements Listener {
     @EventHandler
     public void onPetTarget(EntityTargetLivingEntityEvent event) {
         Entity entity = event.getEntity();
-
-        if (!plugin.getPetManager().isPet(entity)) {
-            return;
-        }
+        if (!plugin.getPetManager().isPet(entity)) return;
 
         event.setCancelled(true);
 
@@ -75,57 +73,39 @@ public class PetProtectionListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEntityEvent event) {
-        // Only handle the main-hand interaction to avoid firing twice
+        // Only fire for the main-hand interaction to avoid double-firing
         if (event.getHand() != EquipmentSlot.HAND) return;
 
         PetManager petManager = plugin.getPetManager();
         Entity entity = event.getRightClicked();
         Player player = event.getPlayer();
 
-        if (!petManager.isPet(entity)) {
-            return;
-        }
+        if (!petManager.isPet(entity)) return;
 
-        // Cancel vanilla interaction (prevents feeding, taming, riding, etc.)
         event.setCancelled(true);
 
-        if (!petManager.isOwner(player, entity)) {
-            return;
-        }
+        if (!petManager.isOwner(player, entity)) return;
 
-        // Open the pet stats GUI for the owner
         PetData petData = petManager.findPetDataByEntity(entity);
-        if (petData != null) {
-            new PetStatsMenu(plugin, petData).open(player);
+        if (petData == null) {
+            // Fallback: re-apply safety properties
+            if (entity instanceof Mob mob) { mob.setTarget(null); mob.setAware(true); }
+            if (entity instanceof Ageable a) { a.setAgeLock(true); a.setBaby(); }
+            if (entity instanceof Hoglin h)  h.setImmuneToZombification(true);
+            if (entity instanceof Piglin p)  p.setImmuneToZombification(true);
+            if (entity instanceof Strider s) s.setShivering(false);
             return;
         }
 
-        // Fallback: re-apply safety properties in case PDC lookup fails
-        if (entity instanceof Mob mob) {
-            mob.setTarget(null);
-            mob.setAware(true);
+        // Elder + compass in hand → open Waypoint menu
+        if (petData.getTier() == PetTier.ELDER
+                && player.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
+            new WaypointMenu(plugin, petData).open(player);
+            return;
         }
 
-        if (entity instanceof Ageable ageable) {
-            ageable.setAgeLock(true);
-            ageable.setBaby();
-        }
-
-        if (entity instanceof Hoglin hoglin) {
-            hoglin.setImmuneToZombification(true);
-        }
-
-        if (entity instanceof Piglin piglin) {
-            piglin.setImmuneToZombification(true);
-        }
-
-        if (entity instanceof Strider strider) {
-            strider.setShivering(false);
-        }
-
-        // NOTE: We intentionally do NOT call setTamed(false) here.
-        // Cats need to stay tamed to prevent their flee AI from activating,
-        // and the event is already cancelled so vanilla taming cannot occur.
+        // Default: open pet stats GUI
+        new PetStatsMenu(plugin, petData).open(player);
     }
 
     @EventHandler
@@ -138,10 +118,7 @@ public class PetProtectionListener implements Listener {
     @EventHandler
     public void onPetTransform(EntityTransformEvent event) {
         Entity entity = event.getEntity();
-
-        if (!plugin.getPetManager().isPet(entity)) {
-            return;
-        }
+        if (!plugin.getPetManager().isPet(entity)) return;
 
         if (entity instanceof Hoglin || entity instanceof Piglin || entity instanceof Strider) {
             event.setCancelled(true);
